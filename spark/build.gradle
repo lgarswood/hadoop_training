@@ -1,0 +1,16 @@
+apply plugin: 'scala'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.scala-lang:scala-library:${scalaVersion}"
+    compile "org.scala-lang:scala-reflect:${scalaVersion}"
+    compile "org.scala-lang:scala-compiler:${scalaVersion}"
+
+    compile "org.apache.spark:spark-core_2.11:2.1.0"
+    compile 'org.apache.spark:spark-sql_2.11:2.1.0'
+    //testCompile 'org.scalatest:scalatest_2.11:3.0.0'
+    //testCompile 'junit:junit:4.12'``
+}
