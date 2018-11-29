@@ -1,5 +1,5 @@
-CREATE DATABASE lucas;
-USE lucas;
+CREATE DATABASE lgarswood;
+USE lgarswood;
 
 CREATE TABLE top_categories (
    id INT NOT NULL AUTO_INCREMENT,
@@ -40,16 +40,15 @@ CREATE TABLE top_countries (
 -------------------------------------------------------
 
 sqoop export \
---connect jdbc:mysql://localhost/lucas \
---username root \
---password cloudera \
+--connect jdbc:mysql://10.0.0.21/lgarswood \
 --table top_categories \
 --export-dir /user/hive/warehouse/lg_top_categories \
 --columns category \
---input-fields-terminated-by ','
+--input-fields-terminated-by ',' \
+--lines-terminated-b
 
 sqoop export \
---connect jdbc:mysql://localhost/lucas \
+--connect jdbc:mysql://10.0.0.21/lgarswood \
 --username root \
 --password cloudera \
 --table top_products \
@@ -58,7 +57,7 @@ sqoop export \
 --input-fields-terminated-by ','
 
 sqoop export \
---connect jdbc:mysql://localhost/lucas \
+--connect jdbc:mysql://10.0.0.21/lgarswood \
 --username root \
 --password cloudera \
 --table top_countries \

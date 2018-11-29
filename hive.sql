@@ -1,7 +1,8 @@
 ./produce.py | nc localhost 44444 1>/dev/null
-flume-ng agent -n agent1 --conf conf -f /hadoop_training/project/agent1.properties -Dflume.root.logger=INFO,console
+flume-ng agent -n agent1 --conf conf -f /home/lgarswood/project/agent1.properties -Dflume.root.logger=INFO,console
+HADOOP_CLASSPATH=/usr/share/cmf/cloudera-scm-telepub/jars/mysql-connector-java-5.1.15.jar sqoop export --connect 'jdbc:mysql://localhost/lgarswood' --table top_categories --export-dir /user/hive/warehouse/lg_top_categories --columns category -fields-terminated-by ','
 JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk.x86_64 spark-shell --driver-class-path /usr/share/java/mysql-connector-java-5.1.34-bin.jar
-
+JAVA_HOME=/usr/java/latest spark2-submit --jars /usr/share/cmf/common_jars/mysql-connector-java-5.1.15.jar --driver-class-path /usr/share/cmf/common_jars/mysql-connector-java-5.1.15.jar --driver-memory 600M --executor-memory 600M --class org.purchases.PurchaseTransformer --master yarn --deploy-mode cluster ~/project/spark/build/libs/spark-all.jar
 CREATE EXTERNAL TABLE lg_purchases(
     product STRING,
     price DECIMAL(10, 2),
@@ -13,24 +14,28 @@ COMMENT "Lucas Garswood test product table"
 PARTITIONED BY(event_date STRING)
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
 STORED AS TEXTFILE
-LOCATION '/user/root/events/';
+LOCATION '/user/lgarswood/events/';
 
-alter table lg_purchases add partition (event_date='2018-10-23') location '2018/10/23';
+alter table lg_purchases add partition (event_date='2018-11-29') location '2018/11/29';
 
 CREATE TABLE lg_top_categories (category String)
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
 STORED AS TEXTFILE;
 
 CREATE TABLE lg_top_products (category String, product String)
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
 STORED AS TEXTFILE;
 
 CREATE TABLE lg_top_countries (country_name String, spending Decimal(10, 2))
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
 STORED AS TEXTFILE;
 
 INSERT INTO lg_top_categories
@@ -77,6 +82,7 @@ CREATE EXTERNAL TABLE lg_countries(
 COMMENT "Lucas Garswood test country table"
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
 STORED AS TEXTFILE
 LOCATION '/user/lgarswood/countries'
 tblproperties ("skip.header.line.count"="1");
@@ -92,6 +98,7 @@ CREATE EXTERNAL TABLE lg_ips(
 COMMENT "Lucas Garswood test ip table"
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
 STORED AS TEXTFILE
 LOCATION '/user/lgarswood/ips'
 tblproperties ("skip.header.line.count"="1");
@@ -100,7 +107,7 @@ INSERT INTO lg_top_countries
 SELECT country_name, spending
 FROM (
     SELECT lg_countries.country_name,
-    SUM(purchases.price) AS spending
+    SUM(CAST(purchases.price * 100 AS INT)) / 100 AS spending
     FROM (
         SELECT mask, registered_country_geoname_id,
         CAST((CAST(network_ip_contents[0] AS BIGINT) * POW(256, 3) + CAST(network_ip_contents[1] AS BIGINT) * POW(256, 2) + CAST(network_ip_contents[2] AS BIGINT) * 256 + CAST(network_ip_contents[3] AS BIGINT)) AS BIGINT) AS network_ip_int
