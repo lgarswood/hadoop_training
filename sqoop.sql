@@ -44,13 +44,10 @@ sqoop export \
 --table top_categories \
 --export-dir /user/hive/warehouse/lg_top_categories \
 --columns category \
---input-fields-terminated-by ',' \
---lines-terminated-b
+--input-fields-terminated-by ','
 
 sqoop export \
 --connect jdbc:mysql://10.0.0.21/lgarswood \
---username root \
---password cloudera \
 --table top_products \
 --export-dir /user/hive/warehouse/lg_top_products \
 --columns category,product \
@@ -58,8 +55,6 @@ sqoop export \
 
 sqoop export \
 --connect jdbc:mysql://10.0.0.21/lgarswood \
---username root \
---password cloudera \
 --table top_countries \
 --export-dir /user/hive/warehouse/lg_top_countries \
 --columns country_name,spending \
